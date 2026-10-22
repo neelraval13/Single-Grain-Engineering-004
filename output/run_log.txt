@@ -1,0 +1,128 @@
+# Engineer 004 - run log (standalone repository, final review)
+# Commands run from: the repository root
+# VALIDATOR = scripts/validate_submission.py from a local copy of https://github.com/ericosiu/beat-claude
+# Recorded: 2026-10-22T16:33:24Z
+
+$ python3 --version
+Python 3.13.2
+[exit code: 0]
+
+$ shasum -a 256 fixtures/event_sample.jsonl
+1aeb24b415009e89fcf8acb5a178410faf216dc17b16920d9849ecc8bbb24235  fixtures/event_sample.jsonl
+[exit code: 0]
+
+$ python3 artifact/detect_anomalies.py fixtures/event_sample.jsonl --out output/anomaly_report.json
+input:   fixtures/event_sample.jsonl
+sha256:  1aeb24b415009e89fcf8acb5a178410faf216dc17b16920d9849ecc8bbb24235
+lines: 25  parsed: 24  malformed: 1  duplicates: 1  unique: 23  no findings: 7
+dispositions: accept=10, deduplicate=1, escalate=1, flag=6, normalize=5, quarantine=2
+detection:    deterministic=17, heuristic=5
+
+line   3  evt-0003   identity_link              accept      deterministic
+line   5  evt-0002   duplicate                  deduplicate deterministic
+line   6  evt-0005   client_clock_skew          normalize   deterministic
+line   7  evt-0006   client_clock_skew          normalize   deterministic
+line   8  evt-0007   pii_in_properties          flag        deterministic
+line   9  evt-0008   identity_link              accept      deterministic
+line  10  evt-0009   legacy_schema              normalize   deterministic
+line  10  evt-0009   missing_received_at        normalize   deterministic
+line  12  evt-0011   invalid_tenant             quarantine  deterministic
+line  13  evt-0012   suspected_bot              flag        heuristic
+line  14  evt-0013   suspected_bot              flag        heuristic
+line  15  evt-0014   suspected_bot              flag        heuristic
+line  16  evt-0015   suspected_bot              flag        heuristic
+line  17  evt-0016   far_future_timestamp       normalize   deterministic
+line  17  evt-0016   identity_link              accept      deterministic
+line  18  evt-0017   privacy_request            escalate    deterministic
+line  18  evt-0017   unverified_identity_claim  flag        deterministic
+line  18  evt-0017   out_of_order               normalize   deterministic
+line  20  evt-0019   client_computed_aggregate  flag        heuristic
+line  21  evt-0020   malformed_record           quarantine  deterministic
+line  23  evt-0022   identity_link              accept      deterministic
+line  25  evt-0024   out_of_order               normalize   deterministic
+
+report written to output/anomaly_report.json
+[exit code: 0]
+
+$ python3 -c "import json; r=json.load(open('output/anomaly_report.json')); print('lines in report:', len(r['lines']), '| total_lines:', r['summary']['total_lines'], '| dispositions sum:', sum(r['summary']['lines_by_disposition'].values()))"
+lines in report: 25 | total_lines: 25 | dispositions sum: 25
+[exit code: 0]
+
+$ (cd artifact && python3 -m unittest -v test_detect_anomalies)
+test_bot_referrer_alone_is_flagged (test_detect_anomalies.Bots.test_bot_referrer_alone_is_flagged) ... ok
+test_burst_split_across_visitors_is_not_flagged (test_detect_anomalies.Bots.test_burst_split_across_visitors_is_not_flagged) ... ok
+test_burst_threshold_is_configurable (test_detect_anomalies.Bots.test_burst_threshold_is_configurable) ... ok
+test_human_paced_browsing_is_not_flagged (test_detect_anomalies.Bots.test_human_paced_browsing_is_not_flagged) ... ok
+test_rapid_burst_from_one_visitor_is_flagged_heuristically (test_detect_anomalies.Bots.test_rapid_burst_from_one_visitor_is_flagged_heuristically) ... ok
+test_client_count_is_flagged_and_cross_checked (test_detect_anomalies.ClientAggregates.test_client_count_is_flagged_and_cross_checked) ... ok
+test_non_aggregate_numbers_are_not_flagged (test_detect_anomalies.ClientAggregates.test_non_aggregate_numbers_are_not_flagged) ... ok
+test_retry_with_new_received_at_is_deduplicated (test_detect_anomalies.Duplicates.test_retry_with_new_received_at_is_deduplicated) ... ok
+test_same_event_id_in_different_tenants_is_not_a_duplicate (test_detect_anomalies.Duplicates.test_same_event_id_in_different_tenants_is_not_a_duplicate) ... ok
+test_same_key_with_different_payload_is_escalated_not_dropped (test_detect_anomalies.Duplicates.test_same_key_with_different_payload_is_escalated_not_dropped) ... ok
+test_anonymous_id_linked_to_two_users_is_escalated (test_detect_anomalies.IdentityStitching.test_anonymous_id_linked_to_two_users_is_escalated) ... ok
+test_identify_links_prior_anonymous_events (test_detect_anomalies.IdentityStitching.test_identify_links_prior_anonymous_events) ... ok
+test_pii_becomes_attributable_after_identify (test_detect_anomalies.IdentityStitching.test_pii_becomes_attributable_after_identify) ... ok
+test_stitching_is_isolated_per_tenant (test_detect_anomalies.IdentityStitching.test_stitching_is_isolated_per_tenant) ... ok
+test_canonical_event_has_no_legacy_finding (test_detect_anomalies.LegacySchema.test_canonical_event_has_no_legacy_finding) ... ok
+test_conflicting_legacy_and_canonical_fields_are_flagged (test_detect_anomalies.LegacySchema.test_conflicting_legacy_and_canonical_fields_are_flagged) ... ok
+test_legacy_fields_types_and_properties_are_normalized (test_detect_anomalies.LegacySchema.test_legacy_fields_types_and_properties_are_normalized) ... ok
+test_invalid_json_is_quarantined_and_processing_continues (test_detect_anomalies.MalformedRecords.test_invalid_json_is_quarantined_and_processing_continues) ... ok
+test_missing_event_id_is_quarantined (test_detect_anomalies.MalformedRecords.test_missing_event_id_is_quarantined) ... ok
+test_non_object_json_and_empty_lines_are_malformed (test_detect_anomalies.MalformedRecords.test_non_object_json_and_empty_lines_are_malformed) ... ok
+test_dates_are_not_phone_numbers (test_detect_anomalies.Pii.test_dates_are_not_phone_numbers) ... ok
+test_email_and_phone_values_are_detected_without_leaking_values (test_detect_anomalies.Pii.test_email_and_phone_values_are_detected_without_leaking_values) ... ok
+test_email_under_innocent_key_is_still_detected (test_detect_anomalies.Pii.test_email_under_innocent_key_is_still_detected) ... ok
+test_key_name_only_match_is_heuristic (test_detect_anomalies.Pii.test_key_name_only_match_is_heuristic) ... ok
+test_ordinary_properties_are_not_pii (test_detect_anomalies.Pii.test_ordinary_properties_are_not_pii) ... ok
+test_phone_shaped_value_alone_is_heuristic (test_detect_anomalies.Pii.test_phone_shaped_value_alone_is_heuristic) ... ok
+test_deletion_request_is_escalated_never_executed (test_detect_anomalies.PrivacyRequests.test_deletion_request_is_escalated_never_executed) ... ok
+test_deletion_scope_ignores_identity_links_from_other_tenants (test_detect_anomalies.PrivacyRequests.test_deletion_scope_ignores_identity_links_from_other_tenants) ... ok
+test_privacy_claim_matching_a_trusted_link_is_marked_corroborated (test_detect_anomalies.PrivacyRequests.test_privacy_claim_matching_a_trusted_link_is_marked_corroborated) ... ok
+test_privacy_event_cannot_establish_an_identity_link (test_detect_anomalies.PrivacyRequests.test_privacy_event_cannot_establish_an_identity_link) ... ok
+test_privacy_wording_in_ordinary_properties_is_not_a_request (test_detect_anomalies.PrivacyRequests.test_privacy_wording_in_ordinary_properties_is_not_a_request) ... ok
+test_request_without_tenant_is_escalated_without_scope (test_detect_anomalies.PrivacyRequests.test_request_without_tenant_is_escalated_without_scope) ... ok
+test_every_line_is_accounted_for_with_valid_labels (test_detect_anomalies.ReportShape.test_every_line_is_accounted_for_with_valid_labels) ... ok
+test_runs_end_to_end_on_the_challenge_fixture (test_detect_anomalies.ReportShape.test_runs_end_to_end_on_the_challenge_fixture) ... ok
+test_null_missing_and_malformed_tenants_are_quarantined (test_detect_anomalies.Tenants.test_null_missing_and_malformed_tenants_are_quarantined) ... ok
+test_tenant_pattern_is_configurable (test_detect_anomalies.Tenants.test_tenant_pattern_is_configurable) ... ok
+test_tenantless_events_are_excluded_from_dedup_and_stitching (test_detect_anomalies.Tenants.test_tenantless_events_are_excluded_from_dedup_and_stitching) ... ok
+test_client_clock_ahead_of_server_is_skew (test_detect_anomalies.Timestamps.test_client_clock_ahead_of_server_is_skew) ... ok
+test_corrected_timestamp_keeps_original_value_and_reason (test_detect_anomalies.Timestamps.test_corrected_timestamp_keeps_original_value_and_reason) ... ok
+test_far_future_is_classified_separately_from_skew (test_detect_anomalies.Timestamps.test_far_future_is_classified_separately_from_skew) ... ok
+test_far_future_threshold_is_configurable (test_detect_anomalies.Timestamps.test_far_future_threshold_is_configurable) ... ok
+test_genuine_out_of_order_persists_after_normalization (test_detect_anomalies.Timestamps.test_genuine_out_of_order_persists_after_normalization) ... ok
+test_invalid_timestamp_keeps_original_value (test_detect_anomalies.Timestamps.test_invalid_timestamp_keeps_original_value) ... ok
+test_late_arrival_is_heuristic (test_detect_anomalies.Timestamps.test_late_arrival_is_heuristic) ... ok
+test_ordering_is_tracked_per_visitor (test_detect_anomalies.Timestamps.test_ordering_is_tracked_per_visitor) ... ok
+test_out_of_order_caused_by_skew_is_resolved_by_normalization (test_detect_anomalies.Timestamps.test_out_of_order_caused_by_skew_is_resolved_by_normalization) ... ok
+test_skew_correction_records_original_and_source (test_detect_anomalies.Timestamps.test_skew_correction_records_original_and_source) ... ok
+test_small_lead_within_tolerance_is_ignored (test_detect_anomalies.Timestamps.test_small_lead_within_tolerance_is_ignored) ... ok
+test_unparseable_or_timezoneless_ts_falls_back (test_detect_anomalies.Timestamps.test_unparseable_or_timezoneless_ts_falls_back) ... ok
+
+----------------------------------------------------------------------
+Ran 49 tests in 0.004s
+
+OK
+[exit code: 0]
+
+$ python3 artifact/sizing.py --out output/sizing_report.md
+report written to output/sizing_report.md
+[exit code: 0]
+
+$ python3 "$VALIDATOR" SUBMISSION.md --strict
+Beat Claude submission pre-screen: SUBMISSION.md
+Files checked: 1
+
+[PASS] Required packet sections: all 7 found
+[PASS] Review manipulation: no injection phrasing, hidden characters, or reviewer-directed comments detected
+[PASS] Verifiability: every section with [Observed] or Tier 2-5 claims contains a checkable reference
+[PASS] Number source labels: no unlabeled numeric claims detected
+[PASS] Evidence tiers: 6 reference(s) to SCORING.md tiers found
+[PASS] Brief version: submission states which brief version it answers
+
+Result: PASS
+[exit code: 0]
+
+$ shasum -a 256 fixtures/event_sample.jsonl
+1aeb24b415009e89fcf8acb5a178410faf216dc17b16920d9849ecc8bbb24235  fixtures/event_sample.jsonl
+[exit code: 0]

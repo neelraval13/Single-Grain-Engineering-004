@@ -1,0 +1,48 @@
+%% Engineer 004 - recommended architecture (revision 3, after architecture review and final audit)
+%% Changes from revision 1 are marked [R2] (review section 1); final-audit changes [R3] (section 9).
+flowchart LR
+  SDK["Customer JS SDK (unchanged)"] -->|"HTTPS, existing hostname + paths"| ALB["ALB (existing DNS name)"]
+  ALB --> COL["Collector - ECS Fargate - Node.js<br/>tenant from write key, payload tenant must match [R2]<br/>assign ingest_id per record [R2]<br/>per-tenant + per-visitor rate limits [R2]<br/>per-tenant migration flags: tee, ack_mode, read_source [R3]"]
+
+  COL -->|"PutRecords, key = tenant_id:anonymous_id<br/>retry FAILED ENTRIES only, deadline ~1-2 s"| KDS[("Kinesis Data Streams - provisioned 24 shards<br/>7-day retention = replay + archive outage window")]
+  COL -. "(1) DURABLE ACK: 2xx only after every record of the request is accepted" .-> SDK
+  COL -. "(2) BACKPRESSURE: 503 / 429 + Retry-After; never ack without a durable write" .-> SDK
+  COL -->|"(3) FALLBACK, built only if SDK does not retry [R2]<br/>SQS SendMessageBatch, then ack"| SQSF[("SQS fallback queue")]
+  SQSF -->|"drainer re-puts, same ingest_id"| KDS
+  COL -->|"per-tenant counters every 10 s [R2]"| PG
+  COL -->|"migration only: forward to legacy"| OLD["Legacy pipeline"]
+
+  KDS --> FH1["Firehose (KDS source)<br/>retries until stream retention"] --> RAW[("S3 raw zone - gzip JSON<br/>14-day lifecycle [R2]")]
+
+  KDS -->|"(4) Lambda ESM: BatchSize 500 + batching window 1 s (required when BatchSize > 10) [R3]<br/>bisect on error, MaxRetry 5, MaxRecordAge 6 h, AT_TIMESTAMP on re-create"| PROC["Processor Lambda - Python<br/>validate, normalize, flag, deletion-registry check [R2]"]
+  PROC -->|"(5) discarded batches WITH payload"| FAIL[("S3 failed-batch bucket - 14 days")]
+  PROC -->|"(6) quarantine: malformed, tenant mismatch, id conflicts"| QUAR[("S3 quarantine + Postgres index - 14 days")]
+  PROC -->|"privacy events: never executed, never link identities"| PRIVQ["Privacy request queue (Postgres)"]
+
+  PROC -->|"(7) one atomic Lua call per event, keys hash-tagged {t:tenant} [R2]<br/>dedup marker (8 h) + counters + HLL + visitor rule buckets + dirty set"| VK[("ElastiCache Valkey - 3 shards x (primary + replica)<br/>noeviction, no backups, derived state only [R2]")]
+  PROC -->|"packed records [R2]"| FH2["Firehose Direct PUT"] --> STG[("S3 staging")]
+  STG -->|"hourly Athena MERGE on (tenant_id, event_id) [R2]"| ICE[("S3 Iceberg curated - 13 months<br/>tenant/day partitions")]
+
+  VK --> FLUSH["Rollup flusher: SREM dirty, then GET, then overwrite [R2]"] --> PG[("RDS PostgreSQL Multi-AZ<br/>rollups, identity graph, triggers (unique key),<br/>deletion registry, reconciliation, audit")]
+  ICE --> NIGHT["Nightly Athena jobs: exact recompute of closed days (overwrite),<br/>compaction, VACUUM, reconciliation joins [R2]"] --> PG
+  ICE --> REBUILD["Valkey rebuild after failover:<br/>fence on received_at, overwrite not increment [R2]"] --> VK
+
+  VK --> SEG["Segment evaluator: sum visitor buckets over person's anons<br/>first crossing = SET NX + unique trigger row [R2]"]
+  SEG --> PERS["Personalization API (existing) - pull state; source flag per tenant [R2]"]
+  PERS --> SDK
+  VK --> DASH["Dashboard API"]
+  PG --> DASH
+  ICE --> EXP["Warehouse export - Snowpipe / BigQuery transfer from S3 export prefix"]
+
+  HUMAN["Human review: quarantine, privacy verification + approval,<br/>identity conflicts, rollback / cutover decisions"]
+  QUAR --> HUMAN
+  PRIVQ --> HUMAN
+  HUMAN -->|"approved deletion"| DEL["Deletion job: registry + S3 ledger, Valkey DEL, Postgres DELETE,<br/>Iceberg DELETE, OPTIMIZE, VACUUM, tenant export notice [R2]"]
+  DEL --> PG
+  DEL --> VK
+  DEL --> ICE
+
+  REPLAY["Replay / backfill: S3 raw or Kinesis to a SEPARATE replay stream,<br/>batch path only, never live increments [R2]"] --> ICE
+
+  KDS -. "IteratorAge, throttling" .-> CW["CloudWatch alarms -> on-call"]
+  PG -. "reconciliation deficits" .-> CW

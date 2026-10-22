@@ -1,0 +1,672 @@
+{
+  "input": {
+    "path": "fixtures/event_sample.jsonl",
+    "sha256": "1aeb24b415009e89fcf8acb5a178410faf216dc17b16920d9849ecc8bbb24235"
+  },
+  "summary": {
+    "total_lines": 25,
+    "parsed_events": 24,
+    "malformed_lines": 1,
+    "duplicate_lines": 1,
+    "unique_events": 23,
+    "lines_with_no_findings": 7,
+    "lines_by_disposition": {
+      "accept": 10,
+      "deduplicate": 1,
+      "escalate": 1,
+      "flag": 6,
+      "normalize": 5,
+      "quarantine": 2
+    },
+    "findings_by_category": {
+      "client_clock_skew": 2,
+      "client_computed_aggregate": 1,
+      "duplicate": 1,
+      "far_future_timestamp": 1,
+      "identity_link": 4,
+      "invalid_tenant": 1,
+      "legacy_schema": 1,
+      "malformed_record": 1,
+      "missing_received_at": 1,
+      "out_of_order": 2,
+      "pii_in_properties": 1,
+      "privacy_request": 1,
+      "suspected_bot": 4,
+      "unverified_identity_claim": 1
+    },
+    "findings_by_detection": {
+      "deterministic": 17,
+      "heuristic": 5
+    },
+    "privacy_requests_auto_executed": 0
+  },
+  "config": {
+    "tenant_id_pattern": "^t-\\d+$",
+    "known_event_types": [
+      "page_view",
+      "click",
+      "form_submit",
+      "custom",
+      "identify",
+      "privacy_request"
+    ],
+    "field_aliases": {
+      "timestamp": "ts"
+    },
+    "type_aliases": {
+      "pageview": "page_view",
+      "page-view": "page_view",
+      "formsubmit": "form_submit",
+      "form-submit": "form_submit"
+    },
+    "property_aliases": {
+      "page_path": "path",
+      "ref": "referrer"
+    },
+    "clock_ahead_tolerance_s": 2.0,
+    "far_future_threshold_s": 86400.0,
+    "max_delivery_lag_s": 300.0,
+    "ordering_tolerance_s": 0.0,
+    "bot_burst_min_events": 4,
+    "bot_burst_window_s": 1.0,
+    "bot_referrer_pattern": "bot|crawler|spider|scanner",
+    "pii_key_pattern": "e[-_]?mail|phone|mobile|ssn|social_security|address|first_name|last_name|full_name|birth|dob|passport|card_number",
+    "privacy_event_types": [
+      "privacy_request"
+    ],
+    "privacy_request_pattern": "delet|eras|forget|opt[-_]?out|do[-_]?not[-_]?sell",
+    "privacy_request_keys": [
+      "request",
+      "privacy_request",
+      "action"
+    ],
+    "unverified_link_event_types": [
+      "privacy_request"
+    ],
+    "aggregate_key_pattern": "(^|_)(count|counts|total|sum|num|times)(_|$)"
+  },
+  "lines": [
+    {
+      "line": 1,
+      "event_id": "evt-0001",
+      "disposition": "accept",
+      "categories": []
+    },
+    {
+      "line": 2,
+      "event_id": "evt-0002",
+      "disposition": "accept",
+      "categories": []
+    },
+    {
+      "line": 3,
+      "event_id": "evt-0003",
+      "disposition": "accept",
+      "categories": [
+        "identity_link"
+      ]
+    },
+    {
+      "line": 4,
+      "event_id": "evt-0004",
+      "disposition": "accept",
+      "categories": []
+    },
+    {
+      "line": 5,
+      "event_id": "evt-0002",
+      "disposition": "deduplicate",
+      "categories": [
+        "duplicate"
+      ]
+    },
+    {
+      "line": 6,
+      "event_id": "evt-0005",
+      "disposition": "normalize",
+      "categories": [
+        "client_clock_skew"
+      ]
+    },
+    {
+      "line": 7,
+      "event_id": "evt-0006",
+      "disposition": "normalize",
+      "categories": [
+        "client_clock_skew"
+      ]
+    },
+    {
+      "line": 8,
+      "event_id": "evt-0007",
+      "disposition": "flag",
+      "categories": [
+        "pii_in_properties"
+      ]
+    },
+    {
+      "line": 9,
+      "event_id": "evt-0008",
+      "disposition": "accept",
+      "categories": [
+        "identity_link"
+      ]
+    },
+    {
+      "line": 10,
+      "event_id": "evt-0009",
+      "disposition": "normalize",
+      "categories": [
+        "legacy_schema",
+        "missing_received_at"
+      ]
+    },
+    {
+      "line": 11,
+      "event_id": "evt-0010",
+      "disposition": "accept",
+      "categories": []
+    },
+    {
+      "line": 12,
+      "event_id": "evt-0011",
+      "disposition": "quarantine",
+      "categories": [
+        "invalid_tenant"
+      ]
+    },
+    {
+      "line": 13,
+      "event_id": "evt-0012",
+      "disposition": "flag",
+      "categories": [
+        "suspected_bot"
+      ]
+    },
+    {
+      "line": 14,
+      "event_id": "evt-0013",
+      "disposition": "flag",
+      "categories": [
+        "suspected_bot"
+      ]
+    },
+    {
+      "line": 15,
+      "event_id": "evt-0014",
+      "disposition": "flag",
+      "categories": [
+        "suspected_bot"
+      ]
+    },
+    {
+      "line": 16,
+      "event_id": "evt-0015",
+      "disposition": "flag",
+      "categories": [
+        "suspected_bot"
+      ]
+    },
+    {
+      "line": 17,
+      "event_id": "evt-0016",
+      "disposition": "normalize",
+      "categories": [
+        "far_future_timestamp",
+        "identity_link"
+      ]
+    },
+    {
+      "line": 18,
+      "event_id": "evt-0017",
+      "disposition": "escalate",
+      "categories": [
+        "out_of_order",
+        "privacy_request",
+        "unverified_identity_claim"
+      ]
+    },
+    {
+      "line": 19,
+      "event_id": "evt-0018",
+      "disposition": "accept",
+      "categories": []
+    },
+    {
+      "line": 20,
+      "event_id": "evt-0019",
+      "disposition": "flag",
+      "categories": [
+        "client_computed_aggregate"
+      ]
+    },
+    {
+      "line": 21,
+      "event_id": "evt-0020",
+      "disposition": "quarantine",
+      "categories": [
+        "malformed_record"
+      ]
+    },
+    {
+      "line": 22,
+      "event_id": "evt-0021",
+      "disposition": "accept",
+      "categories": []
+    },
+    {
+      "line": 23,
+      "event_id": "evt-0022",
+      "disposition": "accept",
+      "categories": [
+        "identity_link"
+      ]
+    },
+    {
+      "line": 24,
+      "event_id": "evt-0023",
+      "disposition": "accept",
+      "categories": []
+    },
+    {
+      "line": 25,
+      "event_id": "evt-0024",
+      "disposition": "normalize",
+      "categories": [
+        "out_of_order"
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "line": 3,
+      "event_id": "evt-0003",
+      "category": "identity_link",
+      "action": "accept",
+      "detection": "deterministic",
+      "explanation": "Links anon-9f2 to u-5511 within t-042. 2 anonymous-only event(s) are attributed retroactively.",
+      "details": {
+        "tenant_id": "t-042",
+        "anonymous_id": "anon-9f2",
+        "user_id": "u-5511",
+        "linked_by_event_type": "identify",
+        "anonymous_events_to_attribute": [
+          "evt-0001",
+          "evt-0002"
+        ]
+      }
+    },
+    {
+      "line": 5,
+      "event_id": "evt-0002",
+      "category": "duplicate",
+      "action": "deduplicate",
+      "detection": "deterministic",
+      "explanation": "Same tenant_id + event_id and identical payload as line 2 (only received_at differs), consistent with an SDK retry. Keep the first copy, drop this one.",
+      "details": {
+        "duplicate_of_line": 2,
+        "first_received_at": "2026-06-15T14:02:20.014Z",
+        "this_received_at": "2026-06-15T14:02:27.442Z"
+      }
+    },
+    {
+      "line": 6,
+      "event_id": "evt-0005",
+      "category": "client_clock_skew",
+      "action": "normalize",
+      "detection": "deterministic",
+      "explanation": "Client ts is 47.2s after server receipt (tolerance 2.0s). The inconsistency is certain; the cause (drifted clock, timezone bug) is inferred. Use received_at as event time and keep the raw ts for audit.",
+      "details": {
+        "seconds_ahead": 47.19,
+        "original_ts": "2026-06-15T14:05:00.120Z",
+        "received_at": "2026-06-15T14:04:12.930Z",
+        "event_time_used": "2026-06-15T14:04:12.930Z",
+        "event_time_source": "received_at",
+        "correction_reason": "client ts more than 2.0s after server receipt"
+      }
+    },
+    {
+      "line": 7,
+      "event_id": "evt-0006",
+      "category": "client_clock_skew",
+      "action": "normalize",
+      "detection": "deterministic",
+      "explanation": "Client ts is 3900.0s after server receipt (tolerance 2.0s). The inconsistency is certain; the cause (drifted clock, timezone bug) is inferred. Use received_at as event time and keep the raw ts for audit.",
+      "details": {
+        "seconds_ahead": 3900.0,
+        "original_ts": "2026-06-15T15:11:03.552Z",
+        "received_at": "2026-06-15T14:06:03.552Z",
+        "event_time_used": "2026-06-15T14:06:03.552Z",
+        "event_time_source": "received_at",
+        "correction_reason": "client ts more than 2.0s after server receipt"
+      }
+    },
+    {
+      "line": 8,
+      "event_id": "evt-0007",
+      "category": "pii_in_properties",
+      "action": "flag",
+      "detection": "deterministic",
+      "explanation": "Free-form properties contain likely personal data. Redact or tokenize before fan-out to dashboards and warehouse exports, and check the tenant's consent basis. Values are withheld from this report.",
+      "details": {
+        "fields": [
+          {
+            "property": "properties.contact_email",
+            "signals": [
+              "sensitive_key_name",
+              "email_value"
+            ]
+          },
+          {
+            "property": "properties.phone",
+            "signals": [
+              "sensitive_key_name",
+              "phone_value"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "line": 9,
+      "event_id": "evt-0008",
+      "category": "identity_link",
+      "action": "accept",
+      "detection": "deterministic",
+      "explanation": "Links anon-c81 to u-2209 within t-017. 2 anonymous-only event(s) are attributed retroactively.",
+      "details": {
+        "tenant_id": "t-017",
+        "anonymous_id": "anon-c81",
+        "user_id": "u-2209",
+        "linked_by_event_type": "identify",
+        "anonymous_events_to_attribute": [
+          "evt-0004",
+          "evt-0005"
+        ]
+      }
+    },
+    {
+      "line": 10,
+      "event_id": "evt-0009",
+      "category": "legacy_schema",
+      "action": "normalize",
+      "detection": "deterministic",
+      "explanation": "Event uses a legacy SDK shape; mapped onto the canonical schema (the SDK cannot be changed, so this mapping is permanent).",
+      "details": {
+        "mappings": [
+          "timestamp -> ts",
+          "properties.page_path -> properties.path",
+          "properties.ref -> properties.referrer",
+          "type 'pageview' -> 'page_view'"
+        ]
+      }
+    },
+    {
+      "line": 10,
+      "event_id": "evt-0009",
+      "category": "missing_received_at",
+      "action": "normalize",
+      "detection": "deterministic",
+      "explanation": "No server receipt timestamp. Ingestion would stamp received_at on arrival; until then client clock skew cannot be measured for this event."
+    },
+    {
+      "line": 12,
+      "event_id": "evt-0011",
+      "category": "invalid_tenant",
+      "action": "quarantine",
+      "detection": "deterministic",
+      "explanation": "tenant_id is missing or null. In a multi-tenant pipeline the event cannot be attributed; it is held out of dedup, stitching, and dashboards rather than guessed into a tenant."
+    },
+    {
+      "line": 13,
+      "event_id": "evt-0012",
+      "category": "suspected_bot",
+      "action": "flag",
+      "detection": "heuristic",
+      "explanation": "Suspected bot traffic (heuristic, not confirmed). Keep it in raw storage but exclude it from behavioral segments, personalization triggers, and dashboard counts until reviewed.",
+      "details": {
+        "signals": [
+          "bot-like referrer host 'scanner.example-bot.net'",
+          ">= 4 events from one visitor within 1.0s"
+        ]
+      }
+    },
+    {
+      "line": 14,
+      "event_id": "evt-0013",
+      "category": "suspected_bot",
+      "action": "flag",
+      "detection": "heuristic",
+      "explanation": "Suspected bot traffic (heuristic, not confirmed). Keep it in raw storage but exclude it from behavioral segments, personalization triggers, and dashboard counts until reviewed.",
+      "details": {
+        "signals": [
+          "bot-like referrer host 'scanner.example-bot.net'",
+          ">= 4 events from one visitor within 1.0s"
+        ]
+      }
+    },
+    {
+      "line": 15,
+      "event_id": "evt-0014",
+      "category": "suspected_bot",
+      "action": "flag",
+      "detection": "heuristic",
+      "explanation": "Suspected bot traffic (heuristic, not confirmed). Keep it in raw storage but exclude it from behavioral segments, personalization triggers, and dashboard counts until reviewed.",
+      "details": {
+        "signals": [
+          "bot-like referrer host 'scanner.example-bot.net'",
+          ">= 4 events from one visitor within 1.0s"
+        ]
+      }
+    },
+    {
+      "line": 16,
+      "event_id": "evt-0015",
+      "category": "suspected_bot",
+      "action": "flag",
+      "detection": "heuristic",
+      "explanation": "Suspected bot traffic (heuristic, not confirmed). Keep it in raw storage but exclude it from behavioral segments, personalization triggers, and dashboard counts until reviewed.",
+      "details": {
+        "signals": [
+          "bot-like referrer host 'scanner.example-bot.net'",
+          ">= 4 events from one visitor within 1.0s"
+        ]
+      }
+    },
+    {
+      "line": 17,
+      "event_id": "evt-0016",
+      "category": "far_future_timestamp",
+      "action": "normalize",
+      "detection": "deterministic",
+      "explanation": "Client ts is 365.0 days after the server received the event, which is impossible. Event-time windows would mis-bucket it; use received_at as event time and keep the raw ts for audit.",
+      "details": {
+        "seconds_ahead": 31535999.788,
+        "original_ts": "2027-06-15T14:11:27.310Z",
+        "received_at": "2026-06-15T14:11:27.522Z",
+        "event_time_used": "2026-06-15T14:11:27.522Z",
+        "event_time_source": "received_at",
+        "correction_reason": "client ts more than 86400s after server receipt"
+      }
+    },
+    {
+      "line": 17,
+      "event_id": "evt-0016",
+      "category": "identity_link",
+      "action": "accept",
+      "detection": "deterministic",
+      "explanation": "Links anon-52d to u-8842 within t-017. No anonymous-only events for this visitor in the sample.",
+      "details": {
+        "tenant_id": "t-017",
+        "anonymous_id": "anon-52d",
+        "user_id": "u-8842",
+        "linked_by_event_type": "custom",
+        "anonymous_events_to_attribute": []
+      }
+    },
+    {
+      "line": 18,
+      "event_id": "evt-0017",
+      "category": "privacy_request",
+      "action": "escalate",
+      "detection": "deterministic",
+      "explanation": "Privacy/deletion request received as an SDK event. It is not executed automatically: a client-side event is unauthenticated and could be forged, so identity must be verified through an authenticated channel, but it must not be ignored either (regulatory deadline). If verified, deletion would cover 2 candidate event(s) in this tenant, including anonymous events reachable only through identity stitching, plus raw archives and warehouse exports.",
+      "details": {
+        "tenant_id": "t-088",
+        "user_id": "u-1077",
+        "anonymous_id": "anon-77a",
+        "requested": [
+          "delete_all_data"
+        ],
+        "auto_executed": false,
+        "scope_status": "candidate_pending_identity_verification",
+        "scope_basis": "identifiers asserted by the request itself (unverified) plus trusted identity links in the same tenant",
+        "deletion_scope_event_ids": [
+          "evt-0006",
+          "evt-0017"
+        ],
+        "deletion_scope_lines": [
+          7,
+          18
+        ]
+      }
+    },
+    {
+      "line": 18,
+      "event_id": "evt-0017",
+      "category": "unverified_identity_claim",
+      "action": "flag",
+      "detection": "deterministic",
+      "explanation": "A privacy_request event asserts anon-77a belongs to u-1077. This event type is unauthenticated, so the pair is not added to the identity graph; no trusted event in the sample links them.",
+      "details": {
+        "tenant_id": "t-088",
+        "anonymous_id": "anon-77a",
+        "user_id": "u-1077",
+        "event_type": "privacy_request",
+        "corroborated_by_trusted_link": false
+      }
+    },
+    {
+      "line": 18,
+      "event_id": "evt-0017",
+      "category": "out_of_order",
+      "action": "normalize",
+      "detection": "deterministic",
+      "explanation": "Client ts is earlier than line 7 (evt-0006) from the same visitor, which arrived first. The regression disappears once skewed timestamps are replaced by received_at, so the root cause is the earlier event's clock.",
+      "details": {
+        "previous_line": 7,
+        "previous_event_id": "evt-0006",
+        "resolved_by_timestamp_normalization": true
+      }
+    },
+    {
+      "line": 20,
+      "event_id": "evt-0019",
+      "category": "client_computed_aggregate",
+      "action": "flag",
+      "detection": "heuristic",
+      "explanation": "Event carries a client-computed aggregate. Segments such as 'viewed pricing 3x' should be computed server-side from raw events, not trusted from the client. This sample holds 1 matching page_view event(s) for the same stitched identity; the sample is partial, so that neither confirms nor refutes the client's number.",
+      "details": {
+        "client_values": {
+          "count_today": 3
+        },
+        "server_side_matching_page_views_in_sample": [
+          "evt-0001"
+        ]
+      }
+    },
+    {
+      "line": 21,
+      "event_id": "evt-0020",
+      "category": "malformed_record",
+      "action": "quarantine",
+      "detection": "deterministic",
+      "explanation": "Invalid JSON (Expecting ',' delimiter at char 226); quarantined to a dead-letter queue without attempting repair. The event_id was recovered by pattern match and is unverified."
+    },
+    {
+      "line": 23,
+      "event_id": "evt-0022",
+      "category": "identity_link",
+      "action": "accept",
+      "detection": "deterministic",
+      "explanation": "Links anon-3d0 to u-7304 within t-042. 1 anonymous-only event(s) are attributed retroactively. Earlier anonymous events containing PII become tied to this user.",
+      "details": {
+        "tenant_id": "t-042",
+        "anonymous_id": "anon-3d0",
+        "user_id": "u-7304",
+        "linked_by_event_type": "identify",
+        "anonymous_events_to_attribute": [
+          "evt-0007"
+        ],
+        "pii_events_now_attributable": [
+          "evt-0007"
+        ]
+      }
+    },
+    {
+      "line": 25,
+      "event_id": "evt-0024",
+      "category": "out_of_order",
+      "action": "normalize",
+      "detection": "deterministic",
+      "explanation": "Client ts is earlier than line 17 (evt-0016) from the same visitor, which arrived first. The regression disappears once skewed timestamps are replaced by received_at, so the root cause is the earlier event's clock.",
+      "details": {
+        "previous_line": 17,
+        "previous_event_id": "evt-0016",
+        "resolved_by_timestamp_normalization": true
+      }
+    }
+  ],
+  "identity_graph": {
+    "t-017": {
+      "anon-52d": [
+        "u-8842"
+      ],
+      "anon-c81": [
+        "u-2209"
+      ]
+    },
+    "t-042": {
+      "anon-3d0": [
+        "u-7304"
+      ],
+      "anon-9f2": [
+        "u-5511"
+      ]
+    }
+  },
+  "unverified_identity_claims": [
+    {
+      "line": 18,
+      "event_id": "evt-0017",
+      "tenant_id": "t-088",
+      "anonymous_id": "anon-77a",
+      "user_id": "u-1077",
+      "event_type": "privacy_request",
+      "corroborated_by_trusted_link": false
+    }
+  ],
+  "privacy_requests": [
+    {
+      "line": 18,
+      "event_id": "evt-0017",
+      "tenant_id": "t-088",
+      "user_id": "u-1077",
+      "anonymous_id": "anon-77a",
+      "requested": [
+        "delete_all_data"
+      ],
+      "auto_executed": false,
+      "scope_status": "candidate_pending_identity_verification",
+      "scope_basis": "identifiers asserted by the request itself (unverified) plus trusted identity links in the same tenant",
+      "deletion_scope_event_ids": [
+        "evt-0006",
+        "evt-0017"
+      ],
+      "deletion_scope_lines": [
+        7,
+        18
+      ]
+    }
+  ]
+}
